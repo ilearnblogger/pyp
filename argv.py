@@ -1,3 +1,5 @@
+# Code explaination: http://ilearnblogger.blogspot.tw/2015/04/qnaplinux-python-programming-03-command.html
+#!/usr/bin/python
 import sys, getopt
 
 def msg(errarg):
