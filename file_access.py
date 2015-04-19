@@ -1,3 +1,6 @@
+# Code explaination: http://ilearnblogger.blogspot.tw/2015/04/qnaplinux-python-programming-02-basic.html
+#!/usr/bin/python
+
 # import sys; fn = raw_input("Input file name: "); file = open(fn, "r"); print file.read()
 # import sys; file = open(sys.argv[1], "r"); print file.read()
 
