@@ -1,31 +1,42 @@
 # Code explaination: Scan file systems and Extract metadata and texts from files
 #!/usr/bin/python
-import sys, getopt, os
+import sys, getopt, os, time
 from urlparse import urlparse
-# import psycopg2
 import psycopg2, psycopg2.extras
 
 def main(argv):
+  dbConn()
   parseArgs()
+  conn.close()
 
 def dbConn():
-  conn = psycopg2.connect("dbname=fbi user=nas password=QNAP.csie")
+  global conn, cur
+  conn = psycopg2.connect("host=localhost dbname=fs user=nas")
   cur = conn.cursor()
-  cur.execute("SELECT * FROM Object;")
-  cur.fetchone()
 
 def addRepository(arg):
   r = urlparse(arg)
   if os.path.isdir(arg): # local directory exists!
     print "Local dir exists. " + os.path.abspath(arg)
-    insertDbResp('file', 'localhost', os.path.abspath(arg))
+    (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(arg)
+    print (mode, ino, dev, nlink, uid, gid, size, time.ctime(atime), time.ctime(mtime), time.ctime(ctime))
+    insertDbResp('file', 'localhost', os.path.abspath(arg), mtime)
   elif r.netloc == '': # not remote path --> dir not exist!
     print "Local dir does not exist!"
   else: # remote repositiry
     print arg + " Not supported now!"
 
-def insertDbResp(scheme, host, path):
-  print scheme + '://' + host + path
+def insertDbResp(scheme, host, path, dt):
+  global repCID
+  repCID = 2
+  s = path.split("/")
+  name = s[len(s) - 1]
+  sql = (repCID, name, time.ctime(dt), scheme, host, path)
+  sql = "select InsertClassFS" + str(sql) + ";"
+  print sql
+  cur.execute(sql)
+  print "Added CID was " + str(cur.fetchone())
+  conn.commit() # db transaction will be completed after commit()
 
 # print os.listdir(arg)
 
